@@ -1,0 +1,353 @@
+openapi: 3.1.0
+info:
+  title: Finance Tracker API
+  version: 1.0.0
+
+servers:
+  - url: https://api.finassist.com
+    description: API Server
+
+paths:
+  /api/v1/transactions:
+    get:
+      summary: Синхронизация транзакций
+      description: >
+        Получение списка транзакций, измененных после указанного момента времени.
+        Если параметр since не передан, возвращается полный список доступных транзакций.
+        Сравнение выполняется по полю updatedAt по правилу updatedAt > since.
+      tags:
+        - Transactions
+      parameters:
+        - name: since
+          in: query
+          required: false
+          description: ISO 8601 дата-время последней синхронизации по полю updatedAt
+          schema:
+            type: string
+            format: date-time
+            example: "2026-04-16T17:00:00Z"
+      responses:
+        '200':
+          description: Список транзакций для синхронизации  
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      summary: Создание новой транзакции
+      tags:
+        - Transactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCreate'
+      responses:
+        '201':
+          description: Транзакция успешно создана
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    example: "txn_01JQ8K9MZ7Y2X4W6V8U1T3S5R"
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/v1/accounts:
+    get:
+      summary: Синхронизация аккаунтов
+      description: >
+        Получение списка аккаунтов, измененных после указанного момента времени.
+        Если параметр since не передан, возвращается полный список доступных аккаунтов.
+        Сравнение выполняется по полю updatedAt по правилу updatedAt > since.
+      tags:
+        - Accounts
+      parameters:
+        - name: since
+          in: query
+          required: false
+          description: ISO 8601 дата-время последней синхронизации по полю updatedAt
+          schema:
+            type: string
+            format: date-time
+            example: "2026-04-16T17:00:00Z"
+      responses:
+        '200':
+          description: Список аккаунтов для синхронизации    
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Account'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      summary: Создание нового счета (аккаунта)
+      tags:
+        - Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountCreate'
+      responses:
+        '201':
+          description: Аккаунт создан
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    example: "acc_01JQ8K9MZ7Y2X4W6V8U1T3S5R"
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AccountType:
+      type: string
+      enum:
+        - BANK
+        - CASH
+        - CREDIT_CARD
+        - SAVINGS
+        - CRYPTO
+        - CUSTOM
+      example: "CASH"
+
+    CategoryInfo:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          example: "products"
+        name:
+          type: string
+          example: "Продукты"
+        icon:
+          type: string
+          example: "shopping-cart"
+
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Переданы некорректные данные"
+        details:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                example: "amount"
+              message:
+                type: string
+                example: "Поле amount обязательно"
+
+    Account:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - balance
+        - currencyCode
+        - type
+        - updatedAt
+        - deletedAt
+      properties:
+        id:
+          type: string
+          example: "acc_01JQ8K9MZ7Y2X4W6V8U1T3S5R"
+        name:
+          type: string
+          example: "Наличные"
+        balance:
+          type: string
+          format: decimal
+          example: "1250.50"
+        currencyCode:
+          type: string
+          example: "USD"
+        type:
+          $ref: '#/components/schemas/AccountType'
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-04-16T17:00:00Z"
+        deletedAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          example: null
+
+    AccountCreate:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/AccountType'
+
+    Transaction:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - amount
+        - currencyCode
+        - date
+        - name
+        - category
+        - accountId
+        - budgetId
+        - updatedAt
+        - deletedAt
+      properties:
+        id:
+          type: string
+          example: "txn_01JQ8K9MZ7Y2X4W6V8U1T3S5R"
+        amount:
+          type: string
+          format: decimal
+          example: "1500.50"
+        currencyCode:
+          type: string
+          example: "USD"
+        date:
+          type: string
+          format: date-time
+          example: "2026-04-16T17:00:00Z"
+        name:
+          type: string
+          example: "Продукты"
+        category:
+          $ref: '#/components/schemas/CategoryInfo'
+        accountId:
+          type: string
+          example: "acc_01JQ8K9MZ7Y2X4W6V8U1T3S5R"
+        budgetId:
+          type: string
+          example: "budget_monthly_01"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-04-16T17:05:00Z"
+        deletedAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          example: null
+
+    TransactionCreate:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - amount
+        - accountId
+        - categoryId
+        - budgetId
+        - date
+      properties:
+        name:
+          type: string
+          example: "Продукты"
+        amount:
+          type: string
+          format: decimal
+          example: "5.50"
+        accountId:
+          type: string
+          example: "acc_01JQ8K9MZ7Y2X4W6V8U1T3S5R"
+        categoryId:
+          type: string
+          example: "products"
+        budgetId:
+          type: string
+          example: "budget_monthly_01"
+        date:
+          type: string
+          format: date-time
+          example: "2026-04-16T17:00:00Z"
+
+  responses:
+    UnauthorizedError:
+      description: Токен отсутствует, невалиден или срок его действия истек
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+security:
+  - BearerAuth: []

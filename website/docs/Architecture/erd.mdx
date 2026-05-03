@@ -1,0 +1,124 @@
+---
+title: Модель данных (ERD)
+sidebar_position: 2
+---
+
+import Drawio from '@theme/Drawio';
+
+# Модель данных (ERD)
+
+Реализована модель данных для работы с транзакциями и связанными сущностями. Она включает в себя реляционные таблицы и хранилище объектов для медиа-контента (иконки категорий).
+
+## 1. Концептуальная модель
+
+Концептуальная модель определяет основные сущности и связи между ними без детализации атрибутов.
+
+![Концептуальная модель](/img/erd_conceptual.png)
+
+## 2. Логическая модель
+
+Логическая модель детализирует структуру таблиц, типы данных и связи.
+
+<Drawio content={require('!!raw-loader!./db.drawio').default} />
+
+## 3. Физическая модель (DBML)
+
+Физическая модель представлена в формате **DBML** для генерации SQL-скриптов.
+
+```dbml
+Project finassist {
+  database_type: 'PostgreSQL'
+}
+
+Table users {
+  id uuid [pk, not null]
+  email text [not null, unique]
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+  settings jsonb [not null]
+  password_hash text [not null]
+
+  indexes {
+    email [unique]
+    created_at
+  }
+}
+
+Table providers {
+  id uuid [pk, not null]
+  name text [not null, unique]
+  type text [not null]
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+}
+
+Table accounts {
+  id uuid [pk, not null]
+  user_id uuid [not null, ref: > users.id]
+  provider_id uuid [ref: > providers.id]
+  type text [not null]
+  currency char(3) [not null]
+  balance numeric(18,2) [not null, default: 0]
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    user_id
+    provider_id
+  }
+}
+
+Table budgets {
+  id uuid [pk, not null]
+  user_id uuid [not null, ref: > users.id]
+  name text [not null]
+  amount numeric(18,2) [not null]
+  period interval [not null]
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    user_id
+  }
+}
+
+Table icons {
+  id uuid [pk, not null]
+  storage_key text [not null, unique]
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table categories {
+  id uuid [pk, not null]
+  user_id uuid [not null, ref: > users.id]
+  name text [not null]
+  parent_id uuid [ref: > categories.id]
+  icon_id uuid [ref: > icons.id]
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+  
+  indexes {
+    user_id
+    parent_id
+  }
+}
+
+Table transactions {
+  id uuid [pk, not null]
+  account_id uuid [not null, ref: > accounts.id]
+  amount numeric(18,2) [not null]
+  date timestamp [not null]
+  category_id uuid [not null, ref: > categories.id]
+  description text
+  budget_id uuid [ref: > budgets.id]
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    account_id
+    category_id
+    (account_id, date)
+    (account_id, updated_at)
+  }
+}
+```
