@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1m7wzv8" name="Обработка транзакций" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.45.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
+  <decision id="Decision_TransactionPolicy" name="Политика сохранения">
+    <decisionTable id="DecisionTable_18wd0d9">
+      <input id="Input_1" label="account type">
+        <inputExpression id="InputExpression_1" typeRef="string">
+          <text>accountType</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_16rav3c" label="connection status">
+        <inputExpression id="LiteralExpression_1dmjmvp" typeRef="boolean">
+          <text>isConnected</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_11wgyrr" label="transaction source">
+        <inputExpression id="LiteralExpression_064cdml" typeRef="string">
+          <text>transactionSource</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="sync required" name="syncRequired" typeRef="boolean" />
+      <output id="OutputClause_0ljhppn" label="Notification" name="notificationKey" typeRef="string" />
+      <rule id="DecisionRule_0gnj3y8">
+        <description>Если аккаунта нет, то транзакция пришла локально. Ее не синхронизируем и предлагаем зарегистрироваться</description>
+        <inputEntry id="UnaryTests_0w6pstx">
+          <text>"Local"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0gzfg3m">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xgskic">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_12xpr86">
+          <text>false</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0srpls7">
+          <text>"offerToRegister"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0j87agl">
+        <description>Аккаунт есть, заполнили новую транзакцию, синхронизировали</description>
+        <inputEntry id="UnaryTests_0gc3zqj">
+          <text>"Account"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1tjbmmi">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13d7j3x">
+          <text>"Manual"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_11kv2i0">
+          <text>true</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0o203s3">
+          <text>"syncedSuccessfully"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0pwl9k8">
+        <description>Аккаунт есть, заполнили неполную транзакцию, синхронизировали</description>
+        <inputEntry id="UnaryTests_0cq7log">
+          <text>"Account"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jb1x4d">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1iq5x6a">
+          <text>"FromBank"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0ql2idb">
+          <text>true</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1eyibd9">
+          <text>"syncedSuccessfully"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0kw9sca">
+        <description>Уведомляем о невозможности синхронизировать</description>
+        <inputEntry id="UnaryTests_09l3qgq">
+          <text>"Account"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0e6490v">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13usqeg">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1btdd1d">
+          <text>false</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ad3ofj">
+          <text>"cantSyncOffline"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape id="Decision_1x8sqtx_di" dmnElementRef="Decision_TransactionPolicy">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
