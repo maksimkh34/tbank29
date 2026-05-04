@@ -64,7 +64,7 @@ const config: Config = {
           {
             id: "finassist",
             spec: "api_specs/finassist-openapi.yaml",
-            route: "/api/",
+            route: "/API/",
           },
         ],
         theme: {
@@ -113,12 +113,24 @@ const config: Config = {
               to: "/docs/intro",
             },
             {
+              label: "Архитектура",
+              to: "/docs/Architecture/storage",
+            },
+            {
+              label: "Процессы",
+              to: "/docs/Processes/bpmn",
+            },
+            {
               label: "Требования",
               to: "/docs/Requirements/fr",
             },
             {
-              label: "Архитектура",
-              to: "/docs/Architecture/storage",
+              label: "UI",
+              to: "/docs/UI/mockups",
+            },
+            {
+              label: "API спецификация",
+              to: "/docs/API/finassist",
             },
           ],
         },
