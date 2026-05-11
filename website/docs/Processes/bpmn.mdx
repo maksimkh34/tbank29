@@ -1,0 +1,27 @@
+---
+title: Бизнес-процессы (BPMN/DMN)
+sidebar_position: 1
+---
+
+import BpmnViewer from '@site/src/components/BpmnViewer';
+import DmnViewer from '@site/src/components/DmnViewer';
+
+# Бизнес-процессы (BPMN/DMN)
+
+Для описания логики работы системы используются нотации **BPMN** (Business Process Model and Notation) и **DMN** (Decision Model and Notation).
+
+## 1. Процесс обработки транзакции
+
+Схема процесса обработки входящей транзакции отображается напрямую из исходного `.bpmn` файла. Этот же файл доступен для скачивания и редактирования в BPMN-моделировщиках.
+
+<BpmnViewer url="/artifacts/transaction.bpmn" height={650} />
+
+[Скачать .bpmn файл](/artifacts/transaction.bpmn)
+
+## 2. Логика принятия решений (DMN)
+
+Таблица принятия решений для определения необходимости синхронизации отображается напрямую из исходного `.dmn` файла. Этот же файл доступен для скачивания и редактирования в DMN-моделировщиках.
+
+<DmnViewer url="/artifacts/syncRequired.dmn" height={650} />
+
+[Скачать .dmn файл](/artifacts/syncRequired.dmn)
