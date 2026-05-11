@@ -27,7 +27,7 @@ const config: Config = {
   organizationName: "maksimkh34", // Usually your GitHub org/user name.
   projectName: "tbank29", // Usually your repo name.
 
-  onBrokenLinks: "warn",
+  onBrokenLinks: "throw",
   trailingSlash: false,
   deploymentBranch: "gh-pages",
 
@@ -91,7 +91,7 @@ const config: Config = {
           label: "Документация",
         },
         {
-          to: "/docs/api/finassist",
+          to: "/docs/API/finassist",
           label: "API",
           position: "left",
         },
